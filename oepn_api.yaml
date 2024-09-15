@@ -1,0 +1,327 @@
+openapi: 3.0.0
+info:
+  title: Charger Type API
+  description: API for managing charger types and supported makes.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /charger-types:
+    post:
+      summary: Create a new charger type
+      requestBody:
+        description: ChargerType object that needs to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                label:
+                  type: string
+                  example: "Type 2"
+                description:
+                  type: string
+                  example: "A type 2 charger"
+                supports_ac:
+                  type: boolean
+                  example: true
+                supports_dc:
+                  type: boolean
+                  example: false
+                power_min:
+                  type: number
+                  format: float
+                  example: 3.7
+                power_max:
+                  type: number
+                  format: float
+                  example: 22.0
+                availability:
+                  type: string
+                  example: "In stock"
+      responses:
+        '201':
+          description: Charger type created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                  label:
+                    type: string
+                    example: "Type 2"
+                  description:
+                    type: string
+                    example: "A type 2 charger"
+                  supports_ac:
+                    type: boolean
+                    example: true
+                  supports_dc:
+                    type: boolean
+                    example: false
+                  power_min:
+                    type: number
+                    format: float
+                    example: 3.7
+                  power_max:
+                    type: number
+                    format: float
+                    example: 22.0
+                  availability:
+                    type: string
+                    example: "In stock"
+        '500':
+          description: Server error
+
+    get:
+      summary: Get all charger types
+      responses:
+        '200':
+          description: List of charger types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    label:
+                      type: string
+                      example: "Type 2"
+                    description:
+                      type: string
+                      example: "A type 2 charger"
+                    supports_ac:
+                      type: boolean
+                      example: true
+                    supports_dc:
+                      type: boolean
+                      example: false
+                    power_min:
+                      type: number
+                      format: float
+                      example: 3.7
+                    power_max:
+                      type: number
+                      format: float
+                      example: 22.0
+                    availability:
+                      type: string
+                      example: "In stock"
+        '500':
+          description: Server error
+
+  /charger-types/{id}:
+    put:
+      summary: Update an existing charger type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Updated ChargerType object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  example: "Type 2 Plus"
+                description:
+                  type: string
+                  example: "An upgraded type 2 charger"
+                supports_ac:
+                  type: boolean
+                  example: true
+                supports_dc:
+                  type: boolean
+                  example: true
+                power_min:
+                  type: number
+                  format: float
+                  example: 7.4
+                power_max:
+                  type: number
+                  format: float
+                  example: 22.0
+                availability:
+                  type: string
+                  example: "In stock"
+      responses:
+        '200':
+          description: Charger type updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                  label:
+                    type: string
+                    example: "Type 2 Plus"
+                  description:
+                    type: string
+                    example: "An upgraded type 2 charger"
+                  supports_ac:
+                    type: boolean
+                    example: true
+                  supports_dc:
+                    type: boolean
+                    example: true
+                  power_min:
+                    type: number
+                    format: float
+                    example: 7.4
+                  power_max:
+                    type: number
+                    format: float
+                    example: 22.0
+                  availability:
+                    type: string
+                    example: "In stock"
+        '404':
+          description: Charger Type not found
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete a charger type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Charger type deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Charger Type deleted successfully"
+                  deletedChargerType:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        '404':
+          description: Charger Type not found
+        '500':
+          description: Server error
+
+  /charger-types/filtered:
+    get:
+      summary: Get filtered charger types based on criteria
+      parameters:
+        - name: supportsAc
+          in: query
+          schema:
+            type: string
+            example: "true"
+        - name: supportsDc
+          in: query
+          schema:
+            type: string
+            example: "false"
+        - name: powerMin
+          in: query
+          schema:
+            type: string
+            example: "3.7"
+        - name: powerMax
+          in: query
+          schema:
+            type: string
+            example: "22.0"
+      responses:
+        '200':
+          description: List of filtered charger types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    label:
+                      type: string
+                      example: "Type 2"
+                    description:
+                      type: string
+                      example: "A type 2 charger"
+                    supports_ac:
+                      type: boolean
+                      example: true
+                    supports_dc:
+                      type: boolean
+                      example: false
+                    power_min:
+                      type: number
+                      format: float
+                      example: 3.7
+                    power_max:
+                      type: number
+                      format: float
+                      example: 22.0
+                    availability:
+                      type: string
+                      example: "In stock"
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    ChargerType:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        label:
+          type: string
+          example: "Type 2"
+        description:
+          type: string
+          example: "A type 2 charger"
+        supports_ac:
+          type: boolean
+          example: true
+        supports_dc:
+          type: boolean
+          example: false
+        power_min:
+          type: number
+          format: float
+          example: 3.7
+        power_max:
+          type: number
+          format: float
+          example: 22.0
+        availability:
+          type: string
+          example: "In stock"

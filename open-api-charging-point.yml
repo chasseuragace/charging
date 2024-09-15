@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: Charging Point Management API
+  description: API for managing charging points including registration, updating, retrieval, and deletion.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/charging-points
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Get all charging points
+      description: Retrieve a list of all charging points.
+      responses:
+        200:
+          description: A list of charging points.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChargingPoint'
+        500:
+          description: Internal server error.
+
+    post:
+      summary: Register a new charging point
+      description: Create a new charging point.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewChargingPoint'
+      responses:
+        201:
+          description: Charging point registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingPoint'
+        500:
+          description: Internal server error.
+
+  /multiple:
+    post:
+      summary: Register multiple charging points
+      description: Create multiple new charging points.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chargingPoints:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/NewChargingPoint'
+      responses:
+        201:
+          description: Charging points registered successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    point:
+                      $ref: '#/components/schemas/NewChargingPoint'
+                    status:
+                      type: string
+                      enum: [success, failed]
+                    chargingPoint:
+                      $ref: '#/components/schemas/ChargingPoint'
+                    error:
+                      type: string
+        500:
+          description: Internal server error.
+
+  /filtered:
+    get:
+      summary: Get filtered charging points
+      description: Retrieve a list of charging points filtered by specified criteria.
+      parameters:
+        - name: vendorIds
+          in: query
+          schema:
+            type: string
+            description: Comma-separated list of vendor IDs.
+        - name: chargerTypeIds
+          in: query
+          schema:
+            type: string
+            description: Comma-separated list of charger type IDs.
+        - name: operationStatus
+          in: query
+          schema:
+            type: string
+            description: Operation status of the charging points.
+        - name: isFree
+          in: query
+          schema:
+            type: boolean
+            description: Whether the charging points are free or not.
+      responses:
+        200:
+          description: A list of filtered charging points.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChargingPoint'
+        500:
+          description: Internal server error.
+
+  /{id}:
+    get:
+      summary: Get a charging point by ID
+      description: Retrieve details of a specific charging point by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Details of the charging point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingPoint'
+        404:
+          description: Charging point not found.
+        500:
+          description: Internal server error.
+
+    put:
+      summary: Update a charging point by ID
+      description: Update details of an existing charging point by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChargingPoint'
+      responses:
+        200:
+          description: Charging point updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingPoint'
+        404:
+          description: Charging point not found.
+        500:
+          description: Internal server error.
+
+    delete:
+      summary: Delete a charging point by ID
+      description: Remove a specific charging point by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Charging point deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Charging Point deleted successfully
+                  deletedChargingPoint:
+                    $ref: '#/components/schemas/ChargingPoint'
+        404:
+          description: Charging point not found.
+        500:
+          description: Internal server error.
+
+  /list/{id}:
+    get:
+      summary: Get a charging point by ID (detailed view)
+      description: Retrieve detailed information of a specific charging point by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Detailed information of the charging point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargingPoint'
+        404:
+          description: Charging point not found.
+        500:
+          description: Internal server error.
+
+components:
+  schemas:
+    ChargingPoint:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vendorId:
+          type: string
+        chargerTypeId:
+          type: string
+        operationStatus:
+          type: string
+        isFree:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    NewChargingPoint:
+      type: object
+      required:
+        - vendorId
+        - chargerTypeId
+        - operationStatus
+      properties:
+        vendorId:
+          type: string
+        chargerTypeId:
+          type: string
+        operationStatus:
+          type: string
+        isFree:
+          type: boolean
+
+    UpdateChargingPoint:
+      type: object
+      properties:
+        vendorId:
+          type: string
+        chargerTypeId:
+          type: string
+        operationStatus:
+          type: string
+        isFree:
+          type: boolean
