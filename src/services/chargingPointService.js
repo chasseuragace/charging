@@ -42,8 +42,42 @@ async registerChargingPoint(data) {
     }
     
     async listFilteredChargingPoints(filters) {
-        const chargingPoints = await this.chargingPointRepository.getGroupedFilteredChargingPoint(filters);
+        const chargingPoints = await this.chargingPointRepository.getFilteredChargingPoint(filters);
+        console.log(chargingPoints);
+        // Flatten and extract all charging_point_id
+        const chargingPointIds = chargingPoints.flatMap((pointGroup) => {
+            return pointGroup.id;
+            
+            
+            // .charging_points.map((point) => {
+            //     console.log(point);
+            //     return point.charging_point_id; // Extract charging_point_id from each point
+            // });
+        });
+        
+        console.log("Extracted Charging Point IDs:", chargingPointIds);
+        
+        if (chargingPointIds.length === 0) return chargingPoints;
 
+        const bookingStatuses = await this.bookingService.fetchBookingStatuses({
+            entityIds: chargingPointIds.join(','),
+            statuses: ['pending', 'in_progress', 'scheduled'].join(',')
+        });
+
+        const bookingStatusMap = this.bookingService.processBookingStatuses(bookingStatuses);
+
+        return chargingPoints.map(point => ({
+            ...point,
+            bookingStatus: bookingStatusMap[point.id] || {
+                status: 'available',
+                details: null
+            }
+        }));
+    }
+
+    async listVendorsGroupChargingPoints(filters) {
+        const chargingPoints = await this.chargingPointRepository.getGroupedFilteredChargingPoint(filters);
+        return chargingPoints;
         // Flatten and extract all charging_point_id
         const chargingPointIds = chargingPoints.flatMap((pointGroup) => {
             return pointGroup.charging_points.map((point) => {

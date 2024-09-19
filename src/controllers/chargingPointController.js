@@ -203,6 +203,36 @@ class ChargingPointController {
             });
         }
     }
+    async listVendorsGroupChargingPoints(req, res) {
+        console.log('Received request to filter charging points with query:', req.query);
+        try {
+            const { vendorIds, chargerTypeIds, operationStatus, isFree } = req.query;
+
+            // Convert comma-separated strings into arrays (if they exist)
+            const vendorIdsArray = vendorIds ? vendorIds.split(',') : null;
+            const chargerTypeIdsArray = chargerTypeIds ? chargerTypeIds.split(',') : null;
+            const isFreeBoolean = isFree === 'true' ? true : isFree === 'false' ? false : null;
+
+            const filters = {
+                vendorIds: vendorIdsArray,
+                chargerTypeIds: chargerTypeIdsArray,
+                operationStatus: operationStatus || null,
+                isFree: isFreeBoolean,
+            };
+
+            console.log('Applying filters:', filters);
+
+            const chargingPoints = await this.chargingPointService.listVendorsGroupChargingPoints(filters);
+
+            console.log(`Successfully fetched ${chargingPoints.length} filtered charging points`);
+            res.status(200).json(chargingPoints);
+        } catch (error) {
+            console.error('Error fetching filtered charging points:', error);
+            res.status(500).json({
+                message: 'An error occurred while fetching charging points',
+            });
+        }
+    }
 
     // Get user's booking history
     async getUserBookingHistory(req, res) {

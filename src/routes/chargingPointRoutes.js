@@ -4,6 +4,7 @@ const ChargingPointController = require('../controllers/chargingPointController'
 const router = express.Router();
 const chargingPointController = new ChargingPointController();
 router.get('/filtered', chargingPointController.getFilteredChargingPoints.bind(chargingPointController));
+router.get('/groupedFilter', chargingPointController.listVendorsGroupChargingPoints.bind(chargingPointController));
 router.get('/filters', chargingPointController.getFilters.bind(chargingPointController));
 // New routes for booking history
 router.get('/user/:userId/booking-history', chargingPointController.getUserBookingHistory.bind(chargingPointController));

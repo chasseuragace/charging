@@ -136,11 +136,8 @@ async registerChargingPoint(chargingPoint) {
     
 
    
-      // Get filtered charging points based on the provided criteria
-      async getFilteredChargingPoint({ vendorIds, chargerTypeIds, operationStatus, isFree }) {
-      if(vendorIds){
-        return this.getGroupedFilteredChargingPoint(vendorIds, chargerTypeIds, operationStatus, isFree );
-      }
+       // Get filtered charging points based on the provided criteria
+       async getFilteredChargingPoint({ vendorIds, chargerTypeIds, operationStatus, isFree }) {
         const query = `
         ${this.chargerDetailCTE}
         SELECT 
@@ -165,32 +162,24 @@ async registerChargingPoint(chargingPoint) {
         const result = await pool.query(query, values);
         return result.rows;
     }
+
     async getGroupedFilteredChargingPoint({ vendorIds, chargerTypeIds, operationStatus, isFree }) {
         const query = `
-        ${this.chargerDetailCTE}
-        SELECT 
-            cp.vendor_id, 
-            cpc.unit_id,
-            ARRAY_AGG(
-                JSON_BUILD_OBJECT(
-                    'charging_point_id', cp.id,
-                    'operation_status', cp.operation_status,
-                    'charger_detail', cd.charger_detail,
-                    'is_free', cp.is_free,
-                    'custom_id', cpc.custom_id,
-                    'plug_id', cpc.plug_id
-                )
-            ) AS charging_points
-        FROM ChargingPoints cp
-        INNER JOIN ChargerDetails cd ON cp.charger_type_id = cd.charger_type_id
-        LEFT JOIN ChargingPointCustomIds cpc ON cp.id = cpc.charging_point_id
-        WHERE 
-            (ARRAY_LENGTH($1::VARCHAR[], 1) IS NULL OR cp.vendor_id = ANY($1::VARCHAR[])) AND
-            (ARRAY_LENGTH($2::UUID[], 1) IS NULL OR cp.charger_type_id = ANY($2::UUID[])) AND
-            ($3::VARCHAR IS NULL OR cp.operation_status = $3) AND
-            ($4::BOOLEAN IS NULL OR cp.is_free = $4)
-        GROUP BY cp.vendor_id, cpc.unit_id
-        ORDER BY cp.vendor_id, cpc.unit_id;
+            ${this.chargerDetailCTE}
+            SELECT 
+                cp.*, 
+                cd.charger_detail,
+                cpc.custom_id,
+                cpc.plug_id
+            FROM ChargingPoints cp
+            INNER JOIN ChargerDetails cd ON cp.charger_type_id = cd.charger_type_id
+            LEFT JOIN ChargingPointCustomIds cpc ON cp.id = cpc.charging_point_id
+            WHERE 
+                (ARRAY_LENGTH($1::VARCHAR[], 1) IS NULL OR cp.vendor_id = ANY($1::VARCHAR[])) AND
+                (ARRAY_LENGTH($2::UUID[], 1) IS NULL OR cp.charger_type_id = ANY($2::UUID[])) AND
+                ($3::VARCHAR IS NULL OR cp.operation_status = $3) AND
+                ($4::BOOLEAN IS NULL OR cp.is_free = $4)
+            ORDER BY cp.vendor_id, cp.unit_id;
         `;
         
         const values = [
@@ -201,8 +190,35 @@ async registerChargingPoint(chargingPoint) {
         ];
     
         const result = await pool.query(query, values);
-        return result.rows;
+    
+        // Process the result to match the desired structure
+        const groupedData = result.rows.reduce((acc, row) => {
+            const { vendor_id, unit_id, ...chargingPoint } = row;  // Keep all other fields as chargingPoint
+    
+            // Find or create the vendor entry
+            let vendor = acc.find(v => v.vendorId === vendor_id);
+            if (!vendor) {
+                vendor = { vendorId: vendor_id, chargingUnits: [] };
+                acc.push(vendor);
+            }
+    
+            // Find or create the charging unit entry
+            let chargingUnit = vendor.chargingUnits.find(cu => cu.unitId === unit_id);
+            if (!chargingUnit) {
+                chargingUnit = { unitId: unit_id, chargingPoints: [] };
+                vendor.chargingUnits.push(chargingUnit);
+            }
+    
+            // Add the charging point to the charging unit
+            chargingUnit.chargingPoints.push(chargingPoint);
+    
+            return acc;
+        }, []);
+    
+        return groupedData;
     }
+    
+    
     
 
     
