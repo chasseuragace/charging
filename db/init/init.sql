@@ -32,8 +32,8 @@ CREATE TABLE ChargingPoints (
     is_free BOOLEAN NOT NULL DEFAULT false, -- Set default value of is_free to false
     -- make_id UUID, -- New column for makeId, referencing SupportedMakes
     unit_id SERIAL NOT NULL, -- Unit identifier, auto-incremented integer
-    FOREIGN KEY (charger_type_id) REFERENCES ChargerTypes(id) ON DELETE CASCADE,
-    FOREIGN KEY (make_id) REFERENCES SupportedMakes(id) ON DELETE SET NULL -- Links to SupportedMakes
+    FOREIGN KEY (charger_type_id) REFERENCES ChargerTypes(id) ON DELETE CASCADE
+    -- FOREIGN KEY (make_id) REFERENCES SupportedMakes(id) ON DELETE SET NULL -- Links to SupportedMakes
 );
 
 
