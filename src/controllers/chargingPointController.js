@@ -203,6 +203,7 @@ class ChargingPointController {
             });
         }
     }
+
     async listVendorsGroupChargingPoints(req, res) {
         console.log('Received request to filter charging points with query:', req.query);
         try {
@@ -265,6 +266,34 @@ class ChargingPointController {
             console.error(`Error fetching booking history for entity ${entityId}:`, error);
             res.status(500).json({
                 message: 'An error occurred while fetching entity booking history',
+                error: error.message
+            });
+        }
+    }
+    // Get Vendor's booking history
+    async getVendorsBookingHistory(req, res) {
+
+        const {  vendorId,
+         } = req.params;
+         const {fromDate,
+            toDate} =req.query;
+        console.log(`Received request for booking history of vendor: ${vendorId}`);
+      
+    
+        try {
+            const filters = {
+                vendorId: vendorId,
+                fromDate: fromDate,
+                toDate: toDate
+               
+            };
+            var bookingHistory = await this.chargingPointService.getBookingHistoryOfChargingPointsOfVendor(filters);
+          
+            res.status(200).json(bookingHistory);
+        } catch (error) {
+            console.error(`Error fetching booking history for vendor ${vendorId}:`, error);
+            res.status(500).json({
+                message: 'An error occurred while fetching vendor booking history',
                 error: error.message
             });
         }

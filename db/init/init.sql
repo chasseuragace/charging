@@ -10,6 +10,7 @@ CREATE TABLE ChargerTypes (
     supports_dc BOOLEAN NOT NULL,
     power_min DECIMAL(10, 2),
     power_max DECIMAL(10, 2),
+    svg_icon  VARCHAR(50),
     availability VARCHAR(255)
 );
 
@@ -27,10 +28,12 @@ CREATE TABLE ChargingPoints (
     vendor_id VARCHAR(50) NOT NULL, -- Vendor ID mapping
     charger_type_id UUID NOT NULL, -- Charger Type ID mapping (UUID)
     operation_status VARCHAR(50) NOT NULL, -- Operational status (e.g., operational, out of order)
+    power DECIMAL(10, 2), -- Power in Kw
     is_free BOOLEAN NOT NULL DEFAULT false, -- Set default value of is_free to false
+    -- make_id UUID, -- New column for makeId, referencing SupportedMakes
     unit_id SERIAL NOT NULL, -- Unit identifier, auto-incremented integer
-    svg_icon  VARCHAR(50),
-    FOREIGN KEY (charger_type_id) REFERENCES ChargerTypes(id) ON DELETE CASCADE
+    FOREIGN KEY (charger_type_id) REFERENCES ChargerTypes(id) ON DELETE CASCADE,
+    FOREIGN KEY (make_id) REFERENCES SupportedMakes(id) ON DELETE SET NULL -- Links to SupportedMakes
 );
 
 
@@ -124,16 +127,16 @@ INSERT INTO SupportedMakes (charger_id, make) VALUES
 
 
 -- Inserting data for Vendor 1, Unit 1 (3 plugs)
-INSERT INTO ChargingPoints (vendor_id, charger_type_id, operation_status, is_free, unit_id) VALUES
-('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 1'), 'operational', false, 1),
-('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 1'), 'operational', false, 1),
-('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 1'), 'operational', false, 1);
+INSERT INTO ChargingPoints (vendor_id, charger_type_id, operation_status, is_free, unit_id,power) VALUES
+('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 1'), 'operational', false, 1,14),
+('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 1'), 'operational', false, 1,14),
+('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 1'), 'operational', false, 1,14);
 
 -- Inserting data for Vendor 1, Unit 2 (3 plugs)
-INSERT INTO ChargingPoints (vendor_id, charger_type_id, operation_status, is_free, unit_id) VALUES
-('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 2'), 'operational', false, 2),
-('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 2'), 'operational', false, 2),
-('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 2'), 'operational', false, 2);
+INSERT INTO ChargingPoints (vendor_id, charger_type_id, operation_status, is_free, unit_id,power) VALUES
+('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 2'), 'operational', false, 2,14),
+('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 2'), 'operational', false, 2,14),
+('B-AEF1EE', (SELECT id FROM ChargerTypes WHERE label = 'Type 2'), 'operational', false, 2,14);
 
 -- -- Inserting data for Vendor 2, Unit 1 (3 plugs)
 -- INSERT INTO ChargingPoints (vendor_id, charger_type_id, operation_status, is_free, unit_id) VALUES

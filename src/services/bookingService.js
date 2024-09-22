@@ -78,6 +78,7 @@ class BookingService {
     async getEntityBookingHistory(entityId) {
         return this.fetchBookingStatuses({ entityIds: entityId });
     }
+   
 
     async createBooking(bookingData) {
         try {

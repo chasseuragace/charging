@@ -47,12 +47,6 @@ async registerChargingPoint(data) {
         // Flatten and extract all charging_point_id
         const chargingPointIds = chargingPoints.flatMap((pointGroup) => {
             return pointGroup.id;
-            
-            
-            // .charging_points.map((point) => {
-            //     console.log(point);
-            //     return point.charging_point_id; // Extract charging_point_id from each point
-            // });
         });
         
         console.log("Extracted Charging Point IDs:", chargingPointIds);
@@ -78,32 +72,29 @@ async registerChargingPoint(data) {
     async listVendorsGroupChargingPoints(filters) {
         const chargingPoints = await this.chargingPointRepository.getGroupedFilteredChargingPoint(filters);
         return chargingPoints;
-        // Flatten and extract all charging_point_id
-        const chargingPointIds = chargingPoints.flatMap((pointGroup) => {
-            return pointGroup.charging_points.map((point) => {
-                console.log(point);
-                return point.charging_point_id; // Extract charging_point_id from each point
-            });
+       
+    }
+    async getBookingHistoryOfChargingPointsOfVendor(filter) {
+        var vendorId =filter.vendorId;
+        var fromDate =filter.fromDate;
+        var toDate =filter.toDate;
+        const result = await this.chargingPointRepository.getChargingPointsOfVendor(vendorId);
+
+       var  chargingPointIds = result.flatMap((instance) => {
+            return instance.id;
         });
-        
-        console.log("Extracted Charging Point IDs:", chargingPointIds);
-        
-        if (chargingPointIds.length === 0) return chargingPoints;
+        if (chargingPointIds.length === 0) return [];
 
         const bookingStatuses = await this.bookingService.fetchBookingStatuses({
             entityIds: chargingPointIds.join(','),
-            statuses: ['pending', 'in_progress', 'scheduled'].join(',')
+            fromDate : fromDate,
+            toDate : toDate
         });
 
-        const bookingStatusMap = this.bookingService.processBookingStatuses(bookingStatuses);
+      
 
-        return chargingPoints.map(point => ({
-            ...point,
-            bookingStatus: bookingStatusMap[point.id] || {
-                status: 'available',
-                details: null
-            }
-        }));
+        return bookingStatuses;
+       
     }
 
 

@@ -9,6 +9,7 @@ router.get('/filters', chargingPointController.getFilters.bind(chargingPointCont
 // New routes for booking history
 router.get('/user/:userId/booking-history', chargingPointController.getUserBookingHistory.bind(chargingPointController));
 router.get('/entity/:entityId/booking-history', chargingPointController.getEntityBookingHistory.bind(chargingPointController));
+router.get('/vendor/:vendorId/booking-history', chargingPointController.getVendorsBookingHistory.bind(chargingPointController));
 router.get('/unit/:id/status', chargingPointController.getBookingStatusOfUnit.bind(chargingPointController));
 // New routes for creating and updating bookings
 router.post('/booking', chargingPointController.createBooking.bind(chargingPointController));
@@ -25,6 +26,7 @@ router.get('/', chargingPointController.listChargingPoints.bind(chargingPointCon
 router.get('/list/:id', chargingPointController.getChargingPoint.bind(chargingPointController));
 // Route for deleting a charging point
 router.delete('/:id', chargingPointController.deleteChargingPoint.bind(chargingPointController));
+
 
 
 
